@@ -3,10 +3,8 @@ import { format } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/Card";
 import { DashboardGreeting } from "@/components/DashboardGreeting";
-import {
-  EquityCurveChart,
-  computeEquityPoints,
-} from "@/components/trading/TradingCharts";
+import { EquityCurveChart } from "@/components/trading/TradingCharts";
+import { computeEquityPoints } from "@/lib/trading-metrics";
 import type { Reminder, Trade, Video } from "@/lib/types";
 
 export default async function DashboardPage() {

@@ -5,6 +5,7 @@ import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
+import { computeEquityPoints } from "@/lib/trading-metrics";
 import type { Trade } from "@/lib/types";
 
 const W = 640;
@@ -24,23 +25,6 @@ function niceTicks(min: number, max: number, count = 4) {
   const span = max - min;
   const step = span / (count - 1);
   return Array.from({ length: count }, (_, i) => min + step * i);
-}
-
-export function computeEquityPoints(trades: Trade[]) {
-  const closed = trades
-    .filter((t) => t.pnl !== null)
-    .slice()
-    .sort(
-      (a, b) =>
-        new Date(a.closed_at ?? a.opened_at).getTime() -
-        new Date(b.closed_at ?? b.opened_at).getTime(),
-    );
-
-  let cum = 0;
-  return closed.map((t) => {
-    cum += t.pnl ?? 0;
-    return { date: t.closed_at ?? t.opened_at, cum };
-  });
 }
 
 /** Curva de equity: P&L acumulado a lo largo del tiempo. */
