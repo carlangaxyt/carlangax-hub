@@ -2,12 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { format } from "date-fns";
-import { Award, ChevronDown, ChevronUp, Pencil, Trash2 } from "lucide-react";
+import { Award, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import {
   deleteChallengeCertificate,
   moveChallengeCertificate,
 } from "@/lib/actions/payouts";
 import { Card } from "@/components/ui/Card";
+import { ConfirmDeleteButton } from "@/components/ui/ConfirmDeleteButton";
 import { CertificateEditModal } from "@/components/payouts/CertificateEditModal";
 import type { ChallengeCertificate } from "@/lib/types";
 
@@ -107,16 +108,14 @@ export function CertificateGrid({
                   >
                     <Pencil size={14} />
                   </button>
-                  <button
-                    onClick={() =>
+                  <ConfirmDeleteButton
+                    label="Eliminar certificado"
+                    onConfirm={() =>
                       startTransition(() =>
                         deleteChallengeCertificate(c.id, c.certificate_path),
                       )
                     }
-                    className="text-muted hover:text-danger"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  />
                 </div>
               </div>
             </Card>

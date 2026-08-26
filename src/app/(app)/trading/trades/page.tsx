@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/Card";
 import { TradeForm } from "@/components/trading/TradeForm";
 import { TradeTable } from "@/components/trading/TradeTable";
 import { ImportCsv } from "@/components/trading/ImportCsv";
+import { TradingCharts } from "@/components/trading/TradingCharts";
 import type { Trade } from "@/lib/types";
 
 export default async function TradesPage() {
@@ -20,6 +21,8 @@ export default async function TradesPage() {
         <h1 className="text-xl font-semibold">Trades</h1>
         <p className="text-sm text-muted">Tu bitácora de trades.</p>
       </div>
+
+      <TradingCharts trades={trades} />
 
       <Card className="space-y-4">
         <TradeForm />

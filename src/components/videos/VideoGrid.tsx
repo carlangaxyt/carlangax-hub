@@ -2,9 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { format } from "date-fns";
-import { Play, Trash2, X } from "lucide-react";
+import { Play, X } from "lucide-react";
 import { deleteVideo, getVideoUrl } from "@/lib/actions/videos";
 import { Card } from "@/components/ui/Card";
+import { ConfirmDeleteButton } from "@/components/ui/ConfirmDeleteButton";
 import type { Video } from "@/lib/types";
 
 const CATEGORY_LABEL: Record<Video["category"], string> = {
@@ -63,16 +64,15 @@ export function VideoGrid({ videos }: { videos: Video[] }) {
                 </div>
               )}
             </div>
-            <button
-              onClick={() =>
+            <ConfirmDeleteButton
+              className="self-end"
+              label="Eliminar video"
+              onConfirm={() =>
                 startTransition(() =>
                   deleteVideo(video.id, video.storage_path),
                 )
               }
-              className="self-end text-muted hover:text-danger"
-            >
-              <Trash2 size={14} />
-            </button>
+            />
           </Card>
         ))}
       </div>
