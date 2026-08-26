@@ -3,6 +3,10 @@ import { format } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/Card";
 import { DashboardGreeting } from "@/components/DashboardGreeting";
+import {
+  EquityCurveChart,
+  computeEquityPoints,
+} from "@/components/trading/TradingCharts";
 import type { Reminder, Trade, Video } from "@/lib/types";
 
 export default async function DashboardPage() {
@@ -38,6 +42,7 @@ export default async function DashboardPage() {
   const winRate = closedTrades.length
     ? Math.round((wins / closedTrades.length) * 100)
     : 0;
+  const equityPoints = computeEquityPoints(allTrades);
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -66,6 +71,12 @@ export default async function DashboardPage() {
           </p>
         </Card>
       </div>
+
+      {equityPoints.length > 0 && (
+        <Card>
+          <EquityCurveChart points={equityPoints} />
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>

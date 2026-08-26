@@ -2,9 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { format } from "date-fns";
-import { ChevronDown, ChevronUp, FileText, Pencil, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, FileText, Pencil } from "lucide-react";
 import { deletePayout, getCertificateUrl, movePayout } from "@/lib/actions/payouts";
 import { cn } from "@/lib/utils";
+import { ConfirmDeleteButton } from "@/components/ui/ConfirmDeleteButton";
 import { PayoutEditModal } from "@/components/payouts/PayoutEditModal";
 import type { Payout } from "@/lib/types";
 
@@ -116,14 +117,12 @@ export function PayoutList({ payouts }: { payouts: Payout[] }) {
                     >
                       <Pencil size={14} />
                     </button>
-                    <button
-                      onClick={() =>
+                    <ConfirmDeleteButton
+                      label="Eliminar payout"
+                      onConfirm={() =>
                         startTransition(() => deletePayout(p.id, p.proof_path))
                       }
-                      className="text-muted hover:text-danger"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    />
                   </div>
                 </td>
               </tr>

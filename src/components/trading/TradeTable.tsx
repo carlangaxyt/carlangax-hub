@@ -2,9 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { format } from "date-fns";
-import { Trash2 } from "lucide-react";
 import { deleteTrade } from "@/lib/actions/trades";
 import { cn } from "@/lib/utils";
+import { ConfirmDeleteButton } from "@/components/ui/ConfirmDeleteButton";
 import { TradeInsightModal } from "@/components/trading/TradeInsightModal";
 import type { Trade } from "@/lib/types";
 
@@ -101,12 +101,12 @@ export function TradeTable({ trades }: { trades: Trade[] }) {
                   )}
                 </td>
                 <td className="py-2 pr-3 text-right">
-                  <button
-                    onClick={() => startTransition(() => deleteTrade(trade.id))}
-                    className="text-muted hover:text-danger"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  <ConfirmDeleteButton
+                    onConfirm={() =>
+                      startTransition(() => deleteTrade(trade.id))
+                    }
+                    label="Eliminar trade"
+                  />
                 </td>
               </tr>
             ))}

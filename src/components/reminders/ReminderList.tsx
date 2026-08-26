@@ -2,9 +2,9 @@
 
 import { useTransition } from "react";
 import { format } from "date-fns";
-import { Trash2 } from "lucide-react";
 import { deleteReminder, toggleReminder } from "@/lib/actions/reminders";
 import { cn } from "@/lib/utils";
+import { ConfirmDeleteButton } from "@/components/ui/ConfirmDeleteButton";
 import type { Reminder } from "@/lib/types";
 
 const PRIORITY_COLOR: Record<Reminder["priority"], string> = {
@@ -59,12 +59,13 @@ export function ReminderList({ reminders }: { reminders: Reminder[] }) {
               </span>
             </div>
           </div>
-          <button
-            onClick={() => startTransition(() => deleteReminder(reminder.id))}
-            className="text-muted hover:text-danger"
-          >
-            <Trash2 size={16} />
-          </button>
+          <ConfirmDeleteButton
+            size={16}
+            label="Eliminar recordatorio"
+            onConfirm={() =>
+              startTransition(() => deleteReminder(reminder.id))
+            }
+          />
         </li>
       ))}
     </ul>
