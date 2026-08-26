@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Carlangax Hub
 
-## Getting Started
+App personal: trading, video, organización y recordatorios. Login con cuenta propia, datos en Supabase (Postgres + Auth + Storage).
 
-First, run the development server:
+## Stack
+
+Next.js 16 (App Router) · TypeScript · Tailwind CSS · Supabase
+
+## Setup
+
+### 1. Crear proyecto en Supabase
+
+1. Ve a [supabase.com](https://supabase.com) y crea una cuenta gratis.
+2. Crea un proyecto nuevo (elige una región cercana, ej. `us-east-1`).
+3. Cuando termine de aprovisionar, ve a **Project Settings → API**.
+4. Copia:
+   - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
+   - **anon public key** → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+### 2. Configurar variables de entorno
+
+Edita `.env.local` en la raíz del proyecto y pega tus valores:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Crear el esquema de base de datos
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. En el dashboard de Supabase, ve a **SQL Editor**.
+2. Pega el contenido completo de [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql) y ejecútalo (botón **Run**).
+3. Esto crea las tablas `trades`, `videos`, `reminders`, sus políticas de seguridad (RLS — cada quien solo ve lo suyo) y el bucket de storage `videos` para tus archivos.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Instalar y correr
 
-## Learn More
+```bash
+npm install
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Abre [http://localhost:3000](http://localhost:3000). Te va a mandar a `/login` — usa "¿Primera vez? Crea tu cuenta" para crear tu usuario.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+> Si tu proyecto de Supabase tiene activada la confirmación por email (viene así por default), revisa tu correo y confirma antes de iniciar sesión.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Estructura
 
-## Deploy on Vercel
+```
+src/
+  app/
+    login/            → pantalla de login/signup
+    (app)/             → rutas protegidas (requieren sesión)
+      dashboard/
+      trading/
+      videos/
+      reminders/
+    auth/callback/     → intercambio de código OAuth/email
+  lib/
+    supabase/          → clientes (browser, server, proxy/middleware)
+    actions/           → Server Actions (mutaciones por módulo)
+    types.ts
+  components/          → UI + componentes por módulo
+supabase/
+  migrations/0001_init.sql
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Cómo agregar un módulo nuevo (a futuro)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Tabla nueva en `supabase/migrations/000X_xxx.sql` con RLS igual al patrón de las existentes.
+2. Tipo en `src/lib/types.ts`.
+3. Server Actions en `src/lib/actions/`.
+4. Página en `src/app/(app)/tu-modulo/page.tsx`.
+5. Entrada en el nav de [`src/components/Sidebar.tsx`](src/components/Sidebar.tsx).
