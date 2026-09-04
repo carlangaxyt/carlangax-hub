@@ -108,3 +108,35 @@ export interface Notification {
   metadata: Record<string, unknown>;
   created_at: string;
 }
+
+export type ContentStage =
+  | "idea"
+  | "guion"
+  | "grabar"
+  | "editar"
+  | "listo"
+  | "publicado";
+
+export interface ContentIdea {
+  id: string;
+  user_id: string;
+  title: string;
+  stage: ContentStage;
+  platform: string | null;
+  notes: string | null;
+  series: string | null;
+  content_type: string | null;
+  record_location: string | null;
+  scheduled_date: string | null;
+  published_date: string | null;
+  published_link: string | null;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface ContentBlueprint {
+  id: string;
+  user_id: string;
+  content: string;
+  updated_at: string;
+}

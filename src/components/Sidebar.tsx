@@ -37,7 +37,15 @@ const NAV: NavItem[] = [
       { href: "/trading/plan", label: "Plan de Trading" },
     ],
   },
-  { href: "/videos", label: "Videos", icon: Video },
+  {
+    href: "/videos",
+    label: "Videos",
+    icon: Video,
+    children: [
+      { href: "/videos/library", label: "Biblioteca" },
+      { href: "/videos/pipeline", label: "Pipeline" },
+    ],
+  },
   { href: "/reminders", label: "Recordatorios", icon: Bell },
   { href: "/notifications", label: "Notificaciones", icon: Inbox },
 ];
