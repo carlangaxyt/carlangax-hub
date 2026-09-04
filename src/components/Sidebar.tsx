@@ -8,12 +8,14 @@ import {
   LineChart,
   Video,
   Bell,
+  Inbox,
   LogOut,
   ChevronRight,
   X,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { NotificationBell } from "@/components/NotificationBell";
 
 interface NavItem {
   href: string;
@@ -37,6 +39,7 @@ const NAV: NavItem[] = [
   },
   { href: "/videos", label: "Videos", icon: Video },
   { href: "/reminders", label: "Recordatorios", icon: Bell },
+  { href: "/notifications", label: "Notificaciones", icon: Inbox },
 ];
 
 export function Sidebar({
@@ -73,13 +76,16 @@ export function Sidebar({
         <h1 className="text-lg font-semibold">
           Carlangax <span className="text-accent">Hub</span>
         </h1>
-        <button
-          onClick={onCloseMobile}
-          className="text-muted hover:text-foreground md:hidden"
-          aria-label="Cerrar menú"
-        >
-          <X size={20} />
-        </button>
+        <div className="flex items-center gap-3">
+          <NotificationBell />
+          <button
+            onClick={onCloseMobile}
+            className="text-muted hover:text-foreground md:hidden"
+            aria-label="Cerrar menú"
+          >
+            <X size={20} />
+          </button>
+        </div>
       </div>
 
       <nav className="flex flex-1 flex-col gap-1">
