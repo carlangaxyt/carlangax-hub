@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Menu } from "lucide-react";
 import { Sidebar } from "@/components/Sidebar";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export function AppShell({
   email,
@@ -19,13 +20,16 @@ export function AppShell({
         <h1 className="text-lg font-semibold">
           Carlangax <span className="text-accent">Hub</span>
         </h1>
-        <button
-          onClick={() => setOpen(true)}
-          className="text-muted hover:text-foreground"
-          aria-label="Abrir menú"
-        >
-          <Menu size={22} />
-        </button>
+        <div className="flex items-center gap-3">
+          <NotificationBell />
+          <button
+            onClick={() => setOpen(true)}
+            className="text-muted hover:text-foreground"
+            aria-label="Abrir menú"
+          >
+            <Menu size={22} />
+          </button>
+        </div>
       </div>
 
       {open && (
