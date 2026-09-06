@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Menu } from "lucide-react";
 import { Sidebar } from "@/components/Sidebar";
 import { NotificationBell } from "@/components/NotificationBell";
+import { MobileTabBar } from "@/components/MobileTabBar";
 
 export function AppShell({
   email,
@@ -46,7 +47,11 @@ export function AppShell({
         onCloseMobile={() => setOpen(false)}
       />
 
-      <main className="flex-1 overflow-y-auto p-4 md:p-8">{children}</main>
+      <main className="flex-1 overflow-y-auto p-4 pb-24 md:p-8">
+        {children}
+      </main>
+
+      <MobileTabBar />
     </div>
   );
 }
