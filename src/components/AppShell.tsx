@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Menu } from "lucide-react";
 import { Sidebar } from "@/components/Sidebar";
+import { NotificationBell } from "@/components/NotificationBell";
+import { MobileTabBar } from "@/components/MobileTabBar";
 
 export function AppShell({
   email,
@@ -19,13 +21,16 @@ export function AppShell({
         <h1 className="text-lg font-semibold">
           Carlangax <span className="text-accent">Hub</span>
         </h1>
-        <button
-          onClick={() => setOpen(true)}
-          className="text-muted hover:text-foreground"
-          aria-label="Abrir menú"
-        >
-          <Menu size={22} />
-        </button>
+        <div className="flex items-center gap-3">
+          <NotificationBell />
+          <button
+            onClick={() => setOpen(true)}
+            className="text-muted hover:text-foreground"
+            aria-label="Abrir menú"
+          >
+            <Menu size={22} />
+          </button>
+        </div>
       </div>
 
       {open && (
@@ -42,7 +47,11 @@ export function AppShell({
         onCloseMobile={() => setOpen(false)}
       />
 
-      <main className="flex-1 overflow-y-auto p-4 md:p-8">{children}</main>
+      <main className="flex-1 overflow-y-auto p-4 pb-24 md:p-8">
+        {children}
+      </main>
+
+      <MobileTabBar />
     </div>
   );
 }
