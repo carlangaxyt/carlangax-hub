@@ -99,6 +99,25 @@ export interface TradingPlan {
   updated_at: string;
 }
 
+export interface BacktestingSession {
+  id: string;
+  user_id: string;
+  external_id: string;
+  name: string;
+  symbol: string;
+  description: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  start_balance: number | null;
+  current_balance: number | null;
+  net_profit: number | null;
+  trade_count: number;
+  completion: number | null;
+  playbooks: string | null;
+  updated_at: string;
+  created_at: string;
+}
+
 export interface DailyJournalEntry {
   id: string;
   user_id: string;

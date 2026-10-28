@@ -36,6 +36,7 @@ const NAV: NavItem[] = [
       { href: "/trading/calendar", label: "Calendario" },
       { href: "/trading/reports", label: "Reportes" },
       { href: "/trading/strategies", label: "Estrategias" },
+      { href: "/trading/backtesting", label: "Backtesting" },
       { href: "/trading/plan", label: "Plan de Trading" },
       { href: "/trading/payouts", label: "Payouts" },
       { href: "/trading/certificates", label: "Certificados" },
