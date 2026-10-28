@@ -17,11 +17,17 @@ import {
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { IdeaEditModal } from "@/components/pipeline/IdeaEditModal";
-import type { ContentIdea } from "@/lib/types";
+import type { ContentIdea, ContentProperty } from "@/lib/types";
 
 const WEEKDAYS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
-export function PipelineCalendar({ ideas }: { ideas: ContentIdea[] }) {
+export function PipelineCalendar({
+  ideas,
+  properties,
+}: {
+  ideas: ContentIdea[];
+  properties: ContentProperty[];
+}) {
   const router = useRouter();
   const [month, setMonth] = useState(new Date());
   const [editing, setEditing] = useState<ContentIdea | null>(null);
@@ -32,7 +38,10 @@ export function PipelineCalendar({ ideas }: { ideas: ContentIdea[] }) {
     return eachDayOfInterval({ start, end });
   }, [month]);
 
-  const scheduled = ideas.filter((i) => i.scheduled_date);
+  const dateProperty = properties.find((p) => p.type === "date");
+  const scheduled = dateProperty
+    ? ideas.filter((i) => i.properties[dateProperty.id])
+    : [];
 
   return (
     <div className="rounded-xl border border-border bg-surface/40 p-4">
@@ -72,9 +81,14 @@ export function PipelineCalendar({ ideas }: { ideas: ContentIdea[] }) {
 
       <div className="grid grid-cols-7 gap-1">
         {days.map((day) => {
-          const dayIdeas = scheduled.filter((i) =>
-            isSameDay(new Date(`${i.scheduled_date}T00:00:00`), day),
-          );
+          const dayIdeas = dateProperty
+            ? scheduled.filter((i) =>
+                isSameDay(
+                  new Date(`${i.properties[dateProperty.id]}T00:00:00`),
+                  day,
+                ),
+              )
+            : [];
           return (
             <div
               key={day.toISOString()}
@@ -110,6 +124,7 @@ export function PipelineCalendar({ ideas }: { ideas: ContentIdea[] }) {
         <IdeaEditModal
           idea={editing}
           allIdeas={ideas}
+          properties={properties}
           onClose={() => {
             setEditing(null);
             router.refresh();

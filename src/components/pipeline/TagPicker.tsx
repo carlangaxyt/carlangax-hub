@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { X, Plus, Pencil, Trash2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-  renameOptionValue,
-  deleteOptionValue,
+  renamePropertyOption,
+  deletePropertyOption,
 } from "@/lib/actions/content-pipeline";
 
 const COLORS = [
@@ -30,13 +30,13 @@ function colorFor(value: string) {
 
 export function TagPicker({
   name,
-  field,
+  propertyId,
   options,
   defaultValue,
   multi = false,
 }: {
   name: string;
-  field: "platform" | "series" | "content_type";
+  propertyId: string;
   options: string[];
   defaultValue: string | null;
   multi?: boolean;
@@ -113,7 +113,7 @@ export function TagPicker({
 
     setRenames((prev) => ({ ...prev, [opt]: next }));
     setSelected((prev) => prev.map((v) => (v === opt ? next : v)));
-    await renameOptionValue(field, opt, next);
+    await renamePropertyOption(propertyId, opt, next);
     router.refresh();
   }
 
@@ -123,7 +123,7 @@ export function TagPicker({
 
     setDeleted((prev) => new Set(prev).add(opt));
     setSelected((prev) => prev.filter((v) => v !== opt));
-    await deleteOptionValue(field, opt);
+    await deletePropertyOption(propertyId, opt);
     router.refresh();
   }
 
@@ -197,7 +197,10 @@ export function TagPicker({
                       onClick={(e) => e.stopPropagation()}
                       onChange={(e) => setEditValue(e.target.value)}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") confirmEdit(opt, e);
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          confirmEdit(opt, e);
+                        }
                         if (e.key === "Escape") {
                           e.stopPropagation();
                           setEditingOpt(null);

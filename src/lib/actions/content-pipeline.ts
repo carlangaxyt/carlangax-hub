@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import type { ContentStage } from "@/lib/types";
+import type { ContentStage, PropertyType } from "@/lib/types";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -16,7 +16,6 @@ async function requireUser() {
 export async function createContentIdea(input: {
   title: string;
   stage: ContentStage;
-  platform: string | null;
 }) {
   const { supabase, user } = await requireUser();
 
@@ -33,7 +32,6 @@ export async function createContentIdea(input: {
     user_id: user.id,
     title: input.title,
     stage: input.stage,
-    platform: input.platform,
     sort_order: (last?.sort_order ?? 0) + 1,
   });
 
@@ -44,14 +42,8 @@ export async function createContentIdea(input: {
 export async function updateContentIdea(input: {
   id: string;
   title: string;
-  platform: string | null;
   notes: string | null;
-  series: string | null;
-  content_type: string | null;
-  record_location: string | null;
-  scheduled_date: string | null;
-  published_date: string | null;
-  published_link: string | null;
+  properties: Record<string, string | string[]>;
 }) {
   const { supabase } = await requireUser();
 
@@ -59,14 +51,8 @@ export async function updateContentIdea(input: {
     .from("content_ideas")
     .update({
       title: input.title,
-      platform: input.platform,
       notes: input.notes,
-      series: input.series,
-      content_type: input.content_type,
-      record_location: input.record_location,
-      scheduled_date: input.scheduled_date,
-      published_date: input.published_date,
-      published_link: input.published_link,
+      properties: input.properties,
     })
     .eq("id", input.id);
 
@@ -105,61 +91,164 @@ export async function deleteContentIdea(id: string) {
   revalidatePath("/videos/pipeline");
 }
 
-type OptionField = "platform" | "series" | "content_type";
-
-async function eachMatchingRow(
-  field: OptionField,
+async function eachMatchingPropertyValue(
+  propertyId: string,
   value: string,
   apply: (current: string) => string | null,
 ) {
   const { supabase, user } = await requireUser();
-  const isMulti = field === "platform";
+
+  const { data: property, error: propError } = await supabase
+    .from("content_properties")
+    .select("type")
+    .eq("id", propertyId)
+    .single();
+  if (propError) throw new Error(propError.message);
+  const isMulti = property.type === "multi_select";
 
   const { data: rows, error } = await supabase
     .from("content_ideas")
-    .select(`id, ${field}`)
+    .select("id, properties")
     .eq("user_id", user.id);
   if (error) throw new Error(error.message);
 
-  for (const row of (rows ?? []) as { id: string; [key: string]: string | null }[]) {
-    const current = row[field];
-    if (!current) continue;
+  for (const row of rows ?? []) {
+    const props = { ...(row.properties as Record<string, string | string[]>) };
+    const current = props[propertyId];
+    if (current === undefined) continue;
 
     if (isMulti) {
-      const parts = current.split(",").map((s) => s.trim()).filter(Boolean);
-      if (!parts.includes(value)) continue;
-      const nextParts = parts
-        .map((p) => (p === value ? apply(p) : p))
-        .filter((p): p is string => Boolean(p));
-      const deduped = Array.from(new Set(nextParts));
-      await supabase
-        .from("content_ideas")
-        .update({ [field]: deduped.length ? deduped.join(", ") : null })
-        .eq("id", row.id);
+      const arr = Array.isArray(current) ? current : [];
+      if (!arr.includes(value)) continue;
+      const next = Array.from(
+        new Set(
+          arr
+            .map((v) => (v === value ? apply(v) : v))
+            .filter((v): v is string => Boolean(v)),
+        ),
+      );
+      if (next.length) props[propertyId] = next;
+      else delete props[propertyId];
     } else {
       if (current !== value) continue;
-      await supabase
-        .from("content_ideas")
-        .update({ [field]: apply(current) })
-        .eq("id", row.id);
+      const next = apply(current as string);
+      if (next) props[propertyId] = next;
+      else delete props[propertyId];
     }
+
+    await supabase
+      .from("content_ideas")
+      .update({ properties: props })
+      .eq("id", row.id);
   }
 
   revalidatePath("/videos/pipeline");
 }
 
-export async function renameOptionValue(
-  field: OptionField,
+export async function renamePropertyOption(
+  propertyId: string,
   oldValue: string,
   newValue: string,
 ) {
   const trimmed = newValue.trim();
   if (!trimmed || trimmed === oldValue) return;
-  await eachMatchingRow(field, oldValue, () => trimmed);
+  await eachMatchingPropertyValue(propertyId, oldValue, () => trimmed);
 }
 
-export async function deleteOptionValue(field: OptionField, value: string) {
-  await eachMatchingRow(field, value, () => null);
+export async function deletePropertyOption(propertyId: string, value: string) {
+  await eachMatchingPropertyValue(propertyId, value, () => null);
+}
+
+export async function createContentProperty(name: string, type: PropertyType) {
+  const { supabase, user } = await requireUser();
+
+  const { data: last } = await supabase
+    .from("content_properties")
+    .select("sort_order")
+    .eq("user_id", user.id)
+    .order("sort_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const { error } = await supabase.from("content_properties").insert({
+    user_id: user.id,
+    name,
+    type,
+    sort_order: (last?.sort_order ?? -1) + 1,
+  });
+
+  if (error) throw new Error(error.message);
+  revalidatePath("/videos/pipeline");
+}
+
+export async function renameContentProperty(id: string, name: string) {
+  const { supabase } = await requireUser();
+  const { error } = await supabase
+    .from("content_properties")
+    .update({ name })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/videos/pipeline");
+}
+
+export async function deleteContentProperty(id: string) {
+  const { supabase, user } = await requireUser();
+
+  const { data: rows, error: fetchError } = await supabase
+    .from("content_ideas")
+    .select("id, properties")
+    .eq("user_id", user.id);
+  if (fetchError) throw new Error(fetchError.message);
+
+  for (const row of rows ?? []) {
+    const props = { ...(row.properties as Record<string, string | string[]>) };
+    if (!(id in props)) continue;
+    delete props[id];
+    await supabase
+      .from("content_ideas")
+      .update({ properties: props })
+      .eq("id", row.id);
+  }
+
+  const { error } = await supabase
+    .from("content_properties")
+    .delete()
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/videos/pipeline");
+}
+
+export async function moveContentProperty(id: string, direction: "up" | "down") {
+  const { supabase, user } = await requireUser();
+
+  const { data: all } = await supabase
+    .from("content_properties")
+    .select("id, sort_order")
+    .eq("user_id", user.id)
+    .order("sort_order", { ascending: true });
+
+  const list = all ?? [];
+  const index = list.findIndex((p) => p.id === id);
+  if (index === -1) return;
+
+  const swapIndex = direction === "up" ? index - 1 : index + 1;
+  if (swapIndex < 0 || swapIndex >= list.length) return;
+
+  const current = list[index];
+  const swap = list[swapIndex];
+
+  await Promise.all([
+    supabase
+      .from("content_properties")
+      .update({ sort_order: swap.sort_order })
+      .eq("id", current.id),
+    supabase
+      .from("content_properties")
+      .update({ sort_order: current.sort_order })
+      .eq("id", swap.id),
+  ]);
+
+  revalidatePath("/videos/pipeline");
 }
 
 export async function saveBlueprint(content: string) {

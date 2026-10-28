@@ -9,7 +9,19 @@ import {
 } from "@/lib/actions/content-pipeline";
 import { cn } from "@/lib/utils";
 import { IdeaEditModal } from "@/components/pipeline/IdeaEditModal";
-import type { ContentIdea, ContentStage } from "@/lib/types";
+import type { ContentIdea, ContentProperty, ContentStage } from "@/lib/types";
+
+function ideaBadges(idea: ContentIdea, properties: ContentProperty[]): string[] {
+  const badges: string[] = [];
+  for (const prop of properties) {
+    const v = idea.properties[prop.id];
+    if (!v) continue;
+    if (Array.isArray(v)) badges.push(...v);
+    else badges.push(v);
+    if (badges.length >= 2) break;
+  }
+  return badges.slice(0, 2);
+}
 
 const COLUMNS: {
   id: ContentStage;
@@ -26,7 +38,13 @@ const COLUMNS: {
   { id: "publicado", label: "Publicado", emoji: "✅", dot: "bg-emerald-400", badge: "bg-emerald-400/10 text-emerald-300" },
 ];
 
-export function KanbanBoard({ ideas }: { ideas: ContentIdea[] }) {
+export function KanbanBoard({
+  ideas,
+  properties,
+}: {
+  ideas: ContentIdea[];
+  properties: ContentProperty[];
+}) {
   const router = useRouter();
   const [addingTo, setAddingTo] = useState<ContentStage | null>(null);
   const [editing, setEditing] = useState<ContentIdea | null>(null);
@@ -60,9 +78,8 @@ export function KanbanBoard({ ideas }: { ideas: ContentIdea[] }) {
   async function handleAdd(stage: ContentStage, formData: FormData) {
     const title = String(formData.get("title") ?? "").trim();
     if (!title) return;
-    const platform = String(formData.get("platform") ?? "") || null;
     setAddingTo(null);
-    await createContentIdea({ title, stage, platform });
+    await createContentIdea({ title, stage });
     router.refresh();
   }
 
@@ -117,21 +134,17 @@ export function KanbanBoard({ ideas }: { ideas: ContentIdea[] }) {
                   >
                     <p className="font-medium">{idea.title}</p>
                     <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                      {idea.platform && (
+                      {ideaBadges(idea, properties).map((badge) => (
                         <span
+                          key={badge}
                           className={cn(
                             "rounded-full px-2 py-0.5 text-[10px] font-medium",
                             col.badge,
                           )}
                         >
-                          {idea.platform}
+                          {badge}
                         </span>
-                      )}
-                      {idea.scheduled_date && (
-                        <span className="text-[10px] text-muted">
-                          {idea.scheduled_date}
-                        </span>
-                      )}
+                      ))}
                     </div>
                   </div>
                 ))}
@@ -167,11 +180,6 @@ export function KanbanBoard({ ideas }: { ideas: ContentIdea[] }) {
                     placeholder="Título..."
                     className="w-full rounded-md border border-border bg-background px-2 py-1 text-sm focus:outline-none"
                   />
-                  <input
-                    name="platform"
-                    placeholder="Plataforma (opcional)"
-                    className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs focus:outline-none"
-                  />
                   <div className="flex gap-1.5">
                     <button
                       type="submit"
@@ -205,6 +213,7 @@ export function KanbanBoard({ ideas }: { ideas: ContentIdea[] }) {
         <IdeaEditModal
           idea={editing}
           allIdeas={ideas}
+          properties={properties}
           onClose={() => {
             setEditing(null);
             router.refresh();
