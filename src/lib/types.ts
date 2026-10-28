@@ -1,4 +1,7 @@
 export type Direction = "long" | "short";
+export type TradeResult = "win" | "loss" | "breakeven";
+export type TradeSource = "manual" | "tradezella";
+export type AccountType = "live" | "backtest";
 
 export interface Trade {
   id: string;
@@ -19,6 +22,13 @@ export interface Trade {
   opened_at: string;
   closed_at: string | null;
   created_at: string;
+  external_id: string | null;
+  source: TradeSource;
+  account: string | null;
+  account_type: AccountType | null;
+  result: TradeResult | null;
+  net_roi: number | null;
+  tags: string[];
 }
 
 export type VideoCategory =
@@ -89,6 +99,15 @@ export interface TradingPlan {
   updated_at: string;
 }
 
+export interface DailyJournalEntry {
+  id: string;
+  user_id: string;
+  journal_date: string;
+  content: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface TradeInsight {
   id: string;
   user_id: string;
@@ -105,19 +124,24 @@ export type ContentStage =
   | "listo"
   | "publicado";
 
+export type PropertyType = "text" | "url" | "date" | "select" | "multi_select";
+
+export interface ContentProperty {
+  id: string;
+  user_id: string;
+  name: string;
+  type: PropertyType;
+  sort_order: number;
+  created_at: string;
+}
+
 export interface ContentIdea {
   id: string;
   user_id: string;
   title: string;
   stage: ContentStage;
-  platform: string | null;
   notes: string | null;
-  series: string | null;
-  content_type: string | null;
-  record_location: string | null;
-  scheduled_date: string | null;
-  published_date: string | null;
-  published_link: string | null;
+  properties: Record<string, string | string[]>;
   sort_order: number;
   created_at: string;
 }

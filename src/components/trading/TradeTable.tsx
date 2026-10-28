@@ -8,7 +8,13 @@ import { ConfirmDeleteButton } from "@/components/ui/ConfirmDeleteButton";
 import { TradeInsightModal } from "@/components/trading/TradeInsightModal";
 import type { Trade } from "@/lib/types";
 
-export function TradeTable({ trades }: { trades: Trade[] }) {
+export function TradeTable({
+  trades,
+  compact = false,
+}: {
+  trades: Trade[];
+  compact?: boolean;
+}) {
   const [, startTransition] = useTransition();
   const [insightTrade, setInsightTrade] = useState<Trade | null>(null);
 
@@ -29,13 +35,14 @@ export function TradeTable({ trades }: { trades: Trade[] }) {
               <th className="py-2 pr-3 font-medium">Fecha</th>
               <th className="py-2 pr-3 font-medium">Símbolo</th>
               <th className="py-2 pr-3 font-medium">Dir</th>
+              {!compact && <th className="py-2 pr-3 font-medium">Cuenta</th>}
               <th className="py-2 pr-3 font-medium">Setup</th>
-              <th className="py-2 pr-3 font-medium">Entry</th>
-              <th className="py-2 pr-3 font-medium">Exit</th>
-              <th className="py-2 pr-3 font-medium">R</th>
+              {!compact && <th className="py-2 pr-3 font-medium">Entry</th>}
+              {!compact && <th className="py-2 pr-3 font-medium">Exit</th>}
+              {!compact && <th className="py-2 pr-3 font-medium">R</th>}
               <th className="py-2 pr-3 font-medium">P&L</th>
-              <th className="py-2 pr-3 font-medium">IA</th>
-              <th className="py-2 pr-3 font-medium"></th>
+              {!compact && <th className="py-2 pr-3 font-medium">IA</th>}
+              {!compact && <th className="py-2 pr-3 font-medium"></th>}
             </tr>
           </thead>
           <tbody>
@@ -54,6 +61,29 @@ export function TradeTable({ trades }: { trades: Trade[] }) {
                     {trade.direction === "long" ? "Long" : "Short"}
                   </span>
                 </td>
+                {!compact && (
+                  <td className="py-2 pr-3 text-muted">
+                    {trade.account ? (
+                      <span className="inline-flex items-center gap-1.5">
+                        {trade.account}
+                        {trade.account_type && (
+                          <span
+                            className={cn(
+                              "rounded-full px-1.5 py-0.5 text-[10px] font-medium",
+                              trade.account_type === "live"
+                                ? "bg-accent/10 text-accent"
+                                : "bg-gold/10 text-gold",
+                            )}
+                          >
+                            {trade.account_type === "live" ? "Live" : "Backtest"}
+                          </span>
+                        )}
+                      </span>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                )}
                 <td
                   className={cn(
                     "py-2 pr-3 text-muted",
@@ -63,15 +93,21 @@ export function TradeTable({ trades }: { trades: Trade[] }) {
                 >
                   {trade.setup ?? "—"}
                 </td>
-                <td className="py-2 pr-3 text-muted">
-                  {trade.entry !== null ? trade.entry : "—"}
-                </td>
-                <td className="py-2 pr-3 text-muted">
-                  {trade.exit !== null ? trade.exit : "—"}
-                </td>
-                <td className="py-2 pr-3">
-                  {trade.r_multiple !== null ? trade.r_multiple.toFixed(2) : "—"}
-                </td>
+                {!compact && (
+                  <td className="py-2 pr-3 text-muted">
+                    {trade.entry !== null ? trade.entry : "—"}
+                  </td>
+                )}
+                {!compact && (
+                  <td className="py-2 pr-3 text-muted">
+                    {trade.exit !== null ? trade.exit : "—"}
+                  </td>
+                )}
+                {!compact && (
+                  <td className="py-2 pr-3">
+                    {trade.r_multiple !== null ? trade.r_multiple.toFixed(2) : "—"}
+                  </td>
+                )}
                 <td
                   className={cn(
                     "py-2 pr-3",
@@ -81,33 +117,37 @@ export function TradeTable({ trades }: { trades: Trade[] }) {
                 >
                   {trade.pnl !== null ? trade.pnl.toFixed(2) : "—"}
                 </td>
-                <td className="py-2 pr-3">
-                  {trade.ai_score !== null ? (
-                    <button
-                      onClick={() => setInsightTrade(trade)}
-                      className={cn(
-                        "rounded-full px-2 py-0.5 text-xs font-medium",
-                        trade.ai_score >= 7
-                          ? "bg-accent/10 text-accent"
-                          : trade.ai_score >= 4
-                            ? "bg-gold/10 text-gold"
-                            : "bg-danger/10 text-danger",
-                      )}
-                    >
-                      {trade.ai_score}/10
-                    </button>
-                  ) : (
-                    <span className="text-muted">—</span>
-                  )}
-                </td>
-                <td className="py-2 pr-3 text-right">
-                  <ConfirmDeleteButton
-                    onConfirm={() =>
-                      startTransition(() => deleteTrade(trade.id))
-                    }
-                    label="Eliminar trade"
-                  />
-                </td>
+                {!compact && (
+                  <td className="py-2 pr-3">
+                    {trade.ai_score !== null ? (
+                      <button
+                        onClick={() => setInsightTrade(trade)}
+                        className={cn(
+                          "rounded-full px-2 py-0.5 text-xs font-medium",
+                          trade.ai_score >= 7
+                            ? "bg-accent/10 text-accent"
+                            : trade.ai_score >= 4
+                              ? "bg-gold/10 text-gold"
+                              : "bg-danger/10 text-danger",
+                        )}
+                      >
+                        {trade.ai_score}/10
+                      </button>
+                    ) : (
+                      <span className="text-muted">—</span>
+                    )}
+                  </td>
+                )}
+                {!compact && (
+                  <td className="py-2 pr-3 text-right">
+                    <ConfirmDeleteButton
+                      onConfirm={() =>
+                        startTransition(() => deleteTrade(trade.id))
+                      }
+                      label="Eliminar trade"
+                    />
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

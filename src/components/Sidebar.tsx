@@ -29,10 +29,14 @@ const NAV: NavItem[] = [
     label: "Trading",
     icon: LineChart,
     children: [
+      { href: "/trading", label: "Resumen" },
       { href: "/trading/trades", label: "Trades" },
+      { href: "/trading/calendar", label: "Calendario" },
+      { href: "/trading/reports", label: "Reportes" },
+      { href: "/trading/strategies", label: "Estrategias" },
+      { href: "/trading/plan", label: "Plan de Trading" },
       { href: "/trading/payouts", label: "Payouts" },
       { href: "/trading/certificates", label: "Certificados" },
-      { href: "/trading/plan", label: "Plan de Trading" },
     ],
   },
   {
@@ -140,7 +144,10 @@ export function Sidebar({
               {children && isOpen && (
                 <div className="ml-4 mt-1 flex flex-col gap-0.5 border-l border-border pl-3">
                   {children.map((child) => {
-                    const childActive = pathname.startsWith(child.href);
+                    const childActive =
+                      child.href === href
+                        ? pathname === child.href
+                        : pathname.startsWith(child.href);
                     return (
                       <Link
                         key={child.href}
