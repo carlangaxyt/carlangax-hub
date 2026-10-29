@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Maximize2, Minimize2 } from "lucide-react";
 
 const SYMBOL_MAP: Record<string, string> = {
   NQ: "CME_MINI:NQ1!",
@@ -35,7 +36,26 @@ export function toTradingViewSymbol(symbol: string) {
 
 /** Gráfico avanzado de TradingView (widget gratuito oficial, embebido). */
 export function TradingViewChart({ symbol }: { symbol: string }) {
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    function onFullscreenChange() {
+      setIsFullscreen(document.fullscreenElement === wrapperRef.current);
+    }
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () =>
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, []);
+
+  function toggleFullscreen() {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      wrapperRef.current?.requestFullscreen();
+    }
+  }
 
   useEffect(() => {
     const el = containerRef.current;
@@ -74,8 +94,22 @@ export function TradingViewChart({ symbol }: { symbol: string }) {
 
   return (
     <div
-      ref={containerRef}
-      className="tradingview-widget-container h-[560px] w-full overflow-hidden rounded-lg"
-    />
+      ref={wrapperRef}
+      className="relative h-[70vh] min-h-[480px] w-full [&:fullscreen]:h-screen [&:fullscreen]:bg-background [&:fullscreen]:p-2"
+    >
+      <button
+        type="button"
+        onClick={toggleFullscreen}
+        className="absolute right-2 top-2 z-10 flex items-center gap-1.5 rounded-md border border-border bg-surface/90 px-2 py-1.5 text-xs text-muted backdrop-blur hover:text-foreground"
+        aria-label={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+      >
+        {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+        {isFullscreen ? "Salir" : "Pantalla completa"}
+      </button>
+      <div
+        ref={containerRef}
+        className="tradingview-widget-container h-full w-full overflow-hidden rounded-lg"
+      />
+    </div>
   );
 }
