@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/Card";
 import { BacktestingView } from "@/components/trading/BacktestingView";
+import { NewBacktestSessionForm } from "@/components/trading/NewBacktestSessionForm";
 import { cn } from "@/lib/utils";
 import type { BacktestingSession } from "@/lib/types";
 
@@ -59,6 +61,8 @@ export default async function BacktestingPage() {
         </Card>
       </div>
 
+      <NewBacktestSessionForm />
+
       {symbols.length > 0 && <BacktestingView symbols={symbols} />}
 
       <Card>
@@ -79,7 +83,11 @@ export default async function BacktestingPage() {
             <tbody>
               {sessions.map((s) => (
                 <tr key={s.id} className="border-b border-border/60">
-                  <td className="py-2 pr-3 font-medium">{s.name}</td>
+                  <td className="py-2 pr-3 font-medium">
+                    <Link href={`/trading/backtesting/${s.id}`} className="hover:text-accent hover:underline">
+                      {s.name}
+                    </Link>
+                  </td>
                   <td className="py-2 pr-3 text-muted">{s.symbol}</td>
                   <td className="py-2 pr-3 text-muted">
                     {s.start_date ?? "—"} → {s.end_date ?? "—"}

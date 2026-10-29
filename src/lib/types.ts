@@ -29,6 +29,7 @@ export interface Trade {
   result: TradeResult | null;
   net_roi: number | null;
   tags: string[];
+  backtesting_session_id: string | null;
 }
 
 export type VideoCategory =
